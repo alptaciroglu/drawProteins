@@ -152,8 +152,13 @@ draw_domains <- function(p,
                         label_domains = TRUE,
                         label_size = 4,
                         show.legend = TRUE,
+                        orientation = "upright",
+                        color = "black",
+                        fill = "white",
                         type = "DOMAIN"){
     begin=end=description=NULL
+    data = cbind(data, orientation, color, fill)
+    
     p <- p + ggplot2::geom_rect(data= data[data$type == type,],
             mapping=ggplot2::aes(xmin=begin,
                         xmax=end,
@@ -167,7 +172,8 @@ draw_domains <- function(p,
                         ggplot2::aes(x = begin + (end-begin)/2,
                             y = order,
                             label = description),
-                            size = label_size)
+                            size = label_size) + 
+        scale_discrete_identity(aesthetics = c("color", "fill", "orientation"))
     }
 
     return(p)
