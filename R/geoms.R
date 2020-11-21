@@ -153,18 +153,28 @@ draw_domains <- function(p,
                         label_size = 4,
                         show.legend = TRUE,
                         orientation = "upright",
-                        color = "black",
+                        colorLabel = "black",
+                        colorDomain = 'firebrick',
                         fill = "white",
                         type = "DOMAIN"){
     begin=end=description=NULL
-    data = cbind(data, orientation, color, fill)
+    data = cbind(data, orientation, colorLabel, colorDomain, fill)
+    
+    n <- length(unique(as.character(data$description)))
+    qual_col_pals <- brewer.pal.info[brewer.pal.info$category == 'qual',]
+    col_vector <- unlist(mapply(brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
+    col_vector <- sample(col_vector, n)
+    domainColor <- as.data.frame.matrix(cbind(unique(data$description), col_vector))
+    colnames(domainColor) <- c('description', 'colorDomain')
+    
+    data <- merge(data, domainColor, by = 'description')
     
     p <- p + ggplot2::geom_rect(data= data[data$type == type,],
             mapping=ggplot2::aes(xmin=begin,
                         xmax=end,
                         ymin=order-0.25,
                         ymax=order+0.25,
-                        fill=description),
+                        fill=colorDomain),
                         show.legend = show.legend)
 
     if(label_domains == TRUE){
@@ -173,7 +183,7 @@ draw_domains <- function(p,
                             y = order,
                             label = description),
                             size = label_size) + 
-        scale_discrete_identity(aesthetics = c("color", "fill", "orientation"))
+        scale_discrete_identity(aesthetics = c("colorLabel", "fill", "orientation"))
     }
 
     return(p)
